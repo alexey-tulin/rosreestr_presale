@@ -5,14 +5,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * Created by KatrinaBosh on 28.09.2016.
  */
 @Configuration
-@ComponentScan(basePackages = "ru.rosreestr")
+@ComponentScan("ru.rosreestr")
 //@EnableJpaRepositories(basePackages = "ru.rosreestr.repository")
 @PropertySource("classpath:application.properties")
 public class AppConfig {

@@ -1,6 +1,9 @@
 
 package ru.rosreestr.client.isur;
 
+import org.springframework.stereotype.Component;
+
+import javax.jws.HandlerChain;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
@@ -17,6 +20,8 @@ import java.net.URL;
  * 
  */
 @WebServiceClient(name = "Service", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/")
+@HandlerChain(file="handler-chain.xml")
+@org.springframework.stereotype.Service
 public class Service extends javax.xml.ws.Service {
 
     private final static URL SERVICE_WSDL_LOCATION;
