@@ -1,24 +1,38 @@
 package ru.rosreestr.utils;
 
 import org.apache.log4j.Logger;
-import org.springframework.util.Base64Utils;
+import org.apache.ws.security.message.WSSecHeader;
+import org.apache.ws.security.message.token.X509Security;
+import org.apache.xml.security.transforms.Transforms;
+import org.apache.xpath.XPathAPI;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import ru.voskhod.crypto.DigitalSignatureFactory;
-import ru.voskhod.crypto.DigitalSignatureProcessor;
 import ru.voskhod.crypto.KeyStoreWrapper;
-import ru.voskhod.crypto.exceptions.SignatureProcessingException;
 
-import javax.xml.namespace.QName;
-import javax.xml.soap.*;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
+import javax.xml.crypto.KeySelector;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.XMLStructure;
+import javax.xml.crypto.dsig.*;
+import javax.xml.crypto.dsig.dom.DOMSignContext;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
+import javax.xml.crypto.dsig.keyinfo.KeyInfo;
+import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
+import javax.xml.crypto.dsig.keyinfo.X509Data;
+import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.TransformerException;
+import java.io.ByteArrayInputStream;
+import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by KatrinaBosh on 30.09.2016.
@@ -27,63 +41,158 @@ public class SignatureUtils {
 
     private static final Logger LOGGER = Logger.getLogger(SignatureUtils.class);
 
-    public static final String XSD_WSS_SEC = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
-    public static final String XSD_WSS_U = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+    public static final String XSD_WSSE = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
+    public static final String XSD_WSU = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
 
-    public static void addSecurityBlock(SOAPMessage message, String certificateAlias, char[] password) throws SOAPException, CertificateException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, SignatureProcessingException {
+    public static void addSecurityBlock(SOAPMessage message, String certificateAlias, char[] password) throws SOAPException, CertificateException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, MarshalException, XMLSignatureException, TransformerException {
 
-        SOAPBody soapBody = message.getSOAPBody();
-        SOAPHeader header =  message.getSOAPHeader();
-
-        // elements for  sign
-        Iterator iterator = soapBody.getChildElements();
-        SOAPBodyElement bodyElement = null;
-        if (iterator.hasNext()) {
-            bodyElement = (SOAPBodyElement)iterator.next();
-            bodyElement.addAttribute(new QName(XSD_WSS_U,"Id"),"_1");
+        if (message == null) {
+            return;
         }
 
-        NodeList nodeList = header.getElementsByTagNameNS("*", "ServiceHeader");
-        Element serviceHeader = null;
-        if (nodeList != null && nodeList.getLength() > 0) {
-            serviceHeader = (Element) nodeList.item(0);
-        }
+        // Prepare secured header
+        message.getSOAPPart().getEnvelope().addNamespaceDeclaration("wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
+        message.getSOAPPart().getEnvelope().addNamespaceDeclaration("wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
+        message.getSOAPPart().getEnvelope().addNamespaceDeclaration("ds", "http://www.w3.org/2000/09/xmldsig#");
+        message.getSOAPBody().setAttributeNS("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "wsu:Id", "_1");
+
+        WSSecHeader header = new WSSecHeader();
+        header.setActor("http://smev.gosuslugi.ru/actors/smev");
+        header.setMustUnderstand(false);
+
+        Element sec = header.insertSecurityHeader(message.getSOAPPart());
+        Document doc = message.getSOAPPart().getEnvelope().getOwnerDocument();
+
+        Element token = (Element) sec.appendChild(
+                doc.createElementNS("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "wsse:BinarySecurityToken"));
+        token.setAttribute("EncodingType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
+        token.setAttribute("ValueType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3");
+        String certIdGUID = java.util.UUID.randomUUID().toString();
+        token.setAttribute("wsu:Id", certIdGUID);
+        token.setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
+        token.setAttribute("xmlns:wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
+        header.getSecurityHeader().appendChild(token);
+
+        //----------------------
+
+        //String certificateAlias = "RaUser-53adea6d-4913-4e3e-af78-410c82d013e3";
 
         // init JCP
         DigitalSignatureFactory.init("JCP");
-        DigitalSignatureProcessor dsp = DigitalSignatureFactory.getDigitalSignatureProcessor();
         KeyStoreWrapper ksw = DigitalSignatureFactory.getKeyStoreWrapper();
 
         X509Certificate x509Certificate = ksw.getX509Certificate(certificateAlias);
         PrivateKey privateKey = ksw.getPrivateKey(certificateAlias, password);
 
-        // create security
-        QName security = new QName(XSD_WSS_SEC, "Security", "sec");
-        SOAPHeaderElement addHeaderElement = header.addHeaderElement(security);
-        String  actorAttributeName = header.getPrefix() + ":actor";
-        addHeaderElement.setAttribute(actorAttributeName, "RSMEVAUTH");
+        Provider pxml = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
+        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", pxml);
 
-        // create BinarySecurityToken
-        final SOAPElement authElement = addHeaderElement.addChildElement("BinarySecurityToken", "wsse", XSD_WSS_SEC);
-        authElement.setAttribute("ValueType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3");
-        authElement.setAttribute("EncodingType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
-        authElement.setAttribute("u:Id", "SecurityToken");
-        authElement.addTextNode(Base64Utils.encodeToString(x509Certificate.getEncoded()));
+        List<Transform> transformList = new ArrayList<Transform>();
+        Transform transformC14N = fac.newTransform(Transforms.TRANSFORM_C14N_EXCL_OMIT_COMMENTS, (XMLStructure) null);
+        transformList.add(transformC14N);
 
-        // create and sign SignedInfo
-        Element sign = dsp.signXMLDSigInfoDetached(Arrays.asList(bodyElement, serviceHeader), privateKey, x509Certificate);
+        Reference ref = fac.newReference(
+                "#_1",
+                fac.newDigestMethod("http://www.w3.org/2001/04/xmldsig-more#gostr3411", null),
+                transformList, null, null);
 
-        // create SecurityTokenReference
-        Element keyInfoElement = sign.getOwnerDocument().createElement("KeyInfo");
-        Element tokenReferenceElement = sign.getOwnerDocument().createElementNS(XSD_WSS_SEC, "SecurityTokenReference");
-        Element referenceElement = sign.getOwnerDocument().createElementNS(XSD_WSS_SEC, "Reference");
-        referenceElement.setAttribute("ValueType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3");
-        referenceElement.setAttribute("URI", "#SecurityToken");
+        Reference ref2 = fac.newReference(
+                "#_2",
+                fac.newDigestMethod("http://www.w3.org/2001/04/xmldsig-more#gostr3411", null),
+                transformList, null, null);
 
-        tokenReferenceElement.appendChild(referenceElement);
-        keyInfoElement.appendChild(tokenReferenceElement);
-        sign.appendChild(keyInfoElement);
-        addHeaderElement.appendChild(sign);
+        // Make link to signing element
+        SignedInfo si = fac.newSignedInfo(
+                fac.newCanonicalizationMethod(CanonicalizationMethod.EXCLUSIVE,
+                        (C14NMethodParameterSpec) null),
+                fac.newSignatureMethod("http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411", null),
+                Arrays.asList(ref, ref2));
+
+        // Prepare key information to verify signature in future on other side
+        KeyInfoFactory kif = fac.getKeyInfoFactory();
+        // final Object[] obj = samData.clone();
+        X509Data x509d = kif.newX509Data(Collections.singletonList(x509Certificate));
+        KeyInfo ki = kif.newKeyInfo(Collections.singletonList(x509d), "Key-" + java.util.UUID.randomUUID().toString());
+
+        // Create signature and sign by private key
+        XMLSignature sig = fac.newXMLSignature(si, ki, null, "Signature-" + java.util.UUID.randomUUID().toString(), null);
+        DOMSignContext signContext = new DOMSignContext(privateKey, token);
+        signContext.putNamespacePrefix(javax.xml.crypto.dsig.XMLSignature.XMLNS, "ds");
+        sig.sign(signContext);
+
+        // Insert signature node in document
+        Element sigE = (Element) XPathAPI.selectSingleNode(signContext.getParent(), "//ds:Signature");
+        org.w3c.dom.Node keyE = XPathAPI.selectSingleNode(sigE, "//ds:KeyInfo", sigE);
+        token.appendChild(doc.createTextNode(XPathAPI.selectSingleNode(keyE, "//ds:X509Certificate", keyE).getFirstChild().getNodeValue()));
+        keyE.removeChild(XPathAPI.selectSingleNode(keyE, "//ds:X509Data", keyE));
+        NodeList chl = keyE.getChildNodes();
+
+        for (int i = 0; i < chl.getLength(); i++) {
+            keyE.removeChild(chl.item(i));
+        }
+
+        Element secTokenRef = doc.createElementNS("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "wsse:SecurityTokenReference");
+        secTokenRef.setAttribute("wsu:Id", "StrId-" + java.util.UUID.randomUUID().toString());
+        secTokenRef.setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
+        secTokenRef.setAttribute("xmlns:wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
+        org.w3c.dom.Node str = keyE.appendChild(secTokenRef);
+
+        Element reference = doc.createElementNS("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "wsse:Reference");
+
+        reference.setAttribute("xmlns:wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
+        Element strRef = (Element) str.appendChild(reference);
+
+        strRef.setAttribute("ValueType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3");
+        strRef.setAttribute("URI", "#" + certIdGUID);
+        header.getSecurityHeader().appendChild(sigE);
+
+    }
+
+    public static void verify(Document doc) throws Exception {
+        // Получение узла, содержащего сертификат.
+        final Element wssecontext = doc.createElementNS(null, "namespaceContext");
+        wssecontext.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
+        NodeList secnodeList = XPathAPI.selectNodeList(doc.getDocumentElement(), "//wsse:Security");
+
+        // Поиск элемента сертификата в блоке BinarySecurityToken.
+        Element r = null;
+        Element el = null;
+        if (secnodeList != null && secnodeList.getLength() > 0) {
+            String actorAttr = null;
+            for (int i = 0; i < secnodeList.getLength(); i++) {
+                el = (Element) secnodeList.item(i);
+                actorAttr = el.getAttributeNS("http://schemas.xmlsoap.org/soap/envelope/", "actor");
+                if (actorAttr != null && actorAttr.equals("http://smev.gosuslugi.ru/actors/smev")) {
+                    r = (Element) XPathAPI.selectSingleNode(el, "//wsse:BinarySecurityToken[1]", wssecontext);
+                    break;
+                }
+            }
+        }
+        if (r == null) {
+            return;
+        }
+        // Получение сертификата.
+        final X509Security x509 = new X509Security(r);
+        // Создаем сертификат.
+        X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509")
+                .generateCertificate(new ByteArrayInputStream(x509.getToken()));
+        if (cert == null) {
+            throw new Exception("Сертификат не найден.");
+        }
+        System.out.println("Verify by: " + cert.getSubjectDN());
+        // Поиск элемента Signature.
+        NodeList nl = doc.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "Signature");
+        if (nl.getLength() == 0) {
+            throw new Exception("Не найден элемент Signature.");
+        }
+        // Задаем открытый ключ для проверки подписи.
+        Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
+        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", xmlDSigProvider);
+        DOMValidateContext valContext = new DOMValidateContext(KeySelector.singletonKeySelector(cert.getPublicKey()), nl.item(0));
+        javax.xml.crypto.dsig.XMLSignature signature = fac.unmarshalXMLSignature(valContext);
+
+        // Проверяем подпись и выводим результат проверки.
+        LOGGER.info("Verified: " + signature.validate(valContext));
     }
 
 }

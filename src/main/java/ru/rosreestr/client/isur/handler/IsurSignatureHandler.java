@@ -25,14 +25,12 @@ public class IsurSignatureHandler  implements SOAPHandler<SOAPMessageContext> {
 
     public boolean handleMessage(SOAPMessageContext context) {
         if (context != null) {
-            try { // TODO заставить сие работать
+            try {
                 final Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
                 if (outbound != null && outbound) {
                     LOGGER.info(SOAPMessage.class.getSimpleName());
                     SOAPMessage message = context.getMessage();
-                    message.getSOAPPart().getEnvelope().addNamespaceDeclaration("def", "http://asguf.mos.ru/rkis_gu/coordinate/v5/");
-                    message.getSOAPPart().getEnvelope().addNamespaceDeclaration("u","http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     try {
@@ -51,6 +49,9 @@ public class IsurSignatureHandler  implements SOAPHandler<SOAPMessageContext> {
                     } catch (Exception e) {
                         LOGGER.error("SOAPMessage err", e);
                     }
+
+                    // todo временно
+                    SignatureUtils.verify(message.getSOAPPart());
                 }
                 return true;
             }  catch (Exception ex) {
