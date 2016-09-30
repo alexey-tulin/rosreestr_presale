@@ -1,11 +1,7 @@
 
 package ru.rosreestr.client.isur.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 
@@ -57,6 +53,8 @@ public class Headers {
     @XmlElement(name = "RequestDateTime", required = true)
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar requestDateTime;
+    @XmlAttribute(name="Id", namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd")
+    protected String id = "_2";
 
     /**
      * Gets the value of the fromOrgCode property.
@@ -202,4 +200,11 @@ public class Headers {
         this.requestDateTime = value;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }
