@@ -45,5 +45,33 @@
             <artifactId>spring-data-jpa</artifactId>
             <version>1.10.3.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Signature -->
+        <dependency>
+            <groupId>ru.voskhod.crypto</groupId>
+            <artifactId>crypto</artifactId>
+            <version>1.2</version>
+            <scope>system</scope>
+           <systemPath>${project.basedir}/src/main/resources/lib/crypto-1.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+            <version>1.4.5</version>
+        </dependency>
     </dependencies>
 </project>
