@@ -11,7 +11,6 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
  */
 @Configuration
 @ComponentScan("ru.rosreestr")
-//@EnableJpaRepositories(basePackages = "ru.rosreestr.repository")
 @PropertySource("classpath:application.properties")
 public class AppConfig {
 
@@ -20,15 +19,5 @@ public class AppConfig {
         return new PropertySourcesPlaceholderConfigurer();
     }
 
-//    @Bean(destroyMethod = "close")
-//    DataSource dataSource(Environment env) {
-//        HikariConfig dataSourceConfig = new HikariConfig();
-//        dataSourceConfig.setDriverClassName(env.getRequiredProperty("db.driver"));
-//        dataSourceConfig.setJdbcUrl(env.getRequiredProperty("db.url"));
-//        dataSourceConfig.setUsername(env.getRequiredProperty("db.username"));
-//        dataSourceConfig.setPassword(env.getRequiredProperty("db.password"));
-//
-//        return new HikariDataSource(dataSourceConfig);
-//    }
 
 }
