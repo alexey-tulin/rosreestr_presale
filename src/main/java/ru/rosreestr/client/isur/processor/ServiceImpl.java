@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.rosreestr.client.isur.IService;
 import ru.rosreestr.client.isur.Service;
 import ru.rosreestr.client.isur.model.*;
-import ru.rosreestr.client.isur.model.ObjectFactory;
-import ru.rosreestr.client.isur.model.ServiceProperties;
+import ru.rosreestr.config.AppProperties;
 import ru.rosreestr.utils.CommonUtils;
+import ru.rosreestr.utils.SignatureUtils;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -30,6 +30,10 @@ public class ServiceImpl {
 
     @Autowired
     public Service service;
+
+    @Autowired
+    private AppProperties properties;
+
 
     /**
      * Method for invoking {@link IService#sendTask(CoordinateTaskData)} service
@@ -103,7 +107,7 @@ public class ServiceImpl {
         byte[] base64Props = CommonUtils.encodeObjectToBase64(serviceProperties);
         ru.rosreestr.client.isur.model.base64.ServiceProperties servicePropertiesBase64 = new ru.rosreestr.client.isur.model.base64.ServiceProperties();
         servicePropertiesBase64.setData(base64Props);
-        servicePropertiesBase64.setSignature(createSignature());
+        servicePropertiesBase64.setSignature(createSignature(base64Props));
         parameter.setAny(servicePropertiesBase64);
 
         return parameter;
@@ -115,7 +119,12 @@ public class ServiceImpl {
     }
 
     //TODO fill in
-    private byte[] createSignature() {
+    private byte[] createSignature(byte[] data) {
+        try {
+            return SignatureUtils.sign(data, properties.getSignatureAlias(), properties.getSignaturePassword().toCharArray());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

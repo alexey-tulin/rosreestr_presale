@@ -41,6 +41,8 @@ public class SignatureUtils {
 
     private static final Logger LOGGER = Logger.getLogger(SignatureUtils.class);
 
+    public static final String ALGORITHM_NAME = "GOST3411withGOST3410EL";
+
     public static final String XSD_WSSE = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
     public static final String XSD_WSU = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
 
@@ -57,7 +59,7 @@ public class SignatureUtils {
         message.getSOAPBody().setAttributeNS("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "wsu:Id", "_1");
 
         WSSecHeader header = new WSSecHeader();
-        header.setActor("http://smev.gosuslugi.ru/actors/smev");
+        header.setActor("RSMEVAUTH");
         header.setMustUnderstand(false);
 
         Element sec = header.insertSecurityHeader(message.getSOAPPart());
@@ -74,8 +76,6 @@ public class SignatureUtils {
         header.getSecurityHeader().appendChild(token);
 
         //----------------------
-
-        //String certificateAlias = "RaUser-53adea6d-4913-4e3e-af78-410c82d013e3";
 
         // init JCP
         DigitalSignatureFactory.init("JCP");
@@ -146,6 +146,14 @@ public class SignatureUtils {
         strRef.setAttribute("URI", "#" + certIdGUID);
         header.getSecurityHeader().appendChild(sigE);
 
+
+//        NodeList nodeList = message.getSOAPHeader().getElementsByTagNameNS("*", "ServiceHeader");
+//        Element serviceHeader = null;
+//        if (nodeList != null && nodeList.getLength() > 0) {
+//            serviceHeader = (Element) nodeList.item(0);
+//            message.getSOAPHeader().removeChild(serviceHeader);
+//            message.getSOAPHeader().insertBefore(serviceHeader, message.getSOAPHeader().getFirstChild());
+//        }
     }
 
     public static void verify(Document doc) throws Exception {
@@ -194,5 +202,56 @@ public class SignatureUtils {
         // Проверяем подпись и выводим результат проверки.
         LOGGER.info("Verified: " + signature.validate(valContext));
     }
+
+    /**
+     * Создание подписи
+     *
+     * @param privateKey закрытый ключ
+     * @param data подписываемые данные
+     * @return подпись
+     * @throws Exception /
+     */
+    public static byte[] sign(PrivateKey privateKey,
+                              byte[] data) throws Exception {
+        // ALGORITHM_NAME алгоритм подписи
+        final Signature sig = Signature.getInstance(ALGORITHM_NAME);
+        sig.initSign(privateKey);
+        sig.update(data);
+        return sig.sign();
+    }
+
+    public static byte[] sign(byte[] data, String certificateAlias, char[] password) throws Exception {
+        DigitalSignatureFactory.init("JCP");
+        KeyStoreWrapper ksw = DigitalSignatureFactory.getKeyStoreWrapper();
+        PrivateKey privateKey = ksw.getPrivateKey(certificateAlias,  password);
+        return sign(privateKey, data);
+    }
+
+
+    /**
+     * Проверка подписи на открытом ключе
+     *
+     * @param alghorithmName алгоритм подписи
+     * @param publicKey открытый ключ
+     * @param data подписываемые данные
+     * @param signature подпись
+     * @return true - верна, false - не верна
+     * @throws Exception /
+     */
+    public static boolean verify(String alghorithmName, PublicKey publicKey,
+                                 byte[] data, byte[] signature) throws Exception {
+        final Signature sig = Signature.getInstance(alghorithmName);
+        sig.initVerify(publicKey);
+        sig.update(data);
+        return sig.verify(signature);
+    }
+
+    public static boolean verify(byte[] data,  byte[] signature, String certificateAlias) throws Exception {
+        DigitalSignatureFactory.init("JCP");
+        KeyStoreWrapper ksw = DigitalSignatureFactory.getKeyStoreWrapper();
+        X509Certificate certificate = ksw.getX509Certificate(certificateAlias);
+        return verify(ALGORITHM_NAME, certificate.getPublicKey(), data, signature);
+    }
+
 
 }
