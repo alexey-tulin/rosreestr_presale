@@ -1,10 +1,7 @@
 
 package ru.rosreestr.client.isur.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 
 /**
@@ -34,6 +31,7 @@ import javax.xml.bind.annotation.XmlType;
     "data",
     "signature"
 })
+@XmlSeeAlso({ru.rosreestr.client.isur.model.base64.ServiceProperties.class})
 public class CoordinateTaskData {
 
     @XmlElement(name = "Task")

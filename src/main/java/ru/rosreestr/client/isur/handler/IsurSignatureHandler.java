@@ -55,7 +55,7 @@ public class IsurSignatureHandler  implements SOAPHandler<SOAPMessageContext> {
                 }
                 return true;
             }  catch (Exception ex) {
-                LOGGER.error(ex);
+                LOGGER.error(ex.getMessage(), ex);
             }
         }
         return false;

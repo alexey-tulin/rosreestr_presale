@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.rosreestr.client.isur.IService;
 import ru.rosreestr.client.isur.Service;
 import ru.rosreestr.client.isur.model.*;
+import ru.rosreestr.client.isur.model.ObjectFactory;
+import ru.rosreestr.client.isur.model.ServiceProperties;
 import ru.rosreestr.utils.CommonUtils;
 
 import javax.xml.bind.JAXBElement;
@@ -46,11 +48,9 @@ public class ServiceImpl {
         CoordinateTaskData coordinateTaskData = new CoordinateTaskData();
         RequestTask requestTask = createRequestTask(serviceNumber);
         DocumentsRequestData documentsRequestData = createDocumentsRequestData();
-        Object signature = createSignature();
 
         coordinateTaskData.setTask(requestTask);
         coordinateTaskData.setData(documentsRequestData);
-        coordinateTaskData.setSignature(signature);
         return coordinateTaskData;
     }
 
@@ -80,7 +80,6 @@ public class ServiceImpl {
         return requestTask;
     }
 
-    //todo PARAMETER
     private DocumentsRequestData createDocumentsRequestData() {
         DocumentsRequestData documentsRequestData = new DocumentsRequestData();
         documentsRequestData.setDocumentTypeCode("77290");
@@ -92,15 +91,31 @@ public class ServiceImpl {
         return documentsRequestData;
     }
 
-    //TODO fill in
+    //TODO fill from db
     private DocumentsRequestData.Parameter createParameter() {
         DocumentsRequestData.Parameter parameter = new DocumentsRequestData.Parameter();
+        ServiceProperties serviceProperties = new ServiceProperties();
+        serviceProperties.setRegion("77");
+        serviceProperties.setCadastralnumber(getCadastralNumber());
+        serviceProperties.setTypeobject("002001002000");
+        serviceProperties.setTyperoom("IsNondomestic");
+
+        byte[] base64Props = CommonUtils.encodeObjectToBase64(serviceProperties);
+        ru.rosreestr.client.isur.model.base64.ServiceProperties servicePropertiesBase64 = new ru.rosreestr.client.isur.model.base64.ServiceProperties();
+        servicePropertiesBase64.setData(base64Props);
+        servicePropertiesBase64.setSignature(createSignature());
+        parameter.setAny(servicePropertiesBase64);
 
         return parameter;
     }
 
+    //TODO fill in from db
+    private String getCadastralNumber() {
+        return "77:01:0004028:4359";
+    }
+
     //TODO fill in
-    private Object createSignature() {
+    private byte[] createSignature() {
         return null;
     }
 
