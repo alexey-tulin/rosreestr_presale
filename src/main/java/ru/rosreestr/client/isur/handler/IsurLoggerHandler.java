@@ -1,6 +1,7 @@
 package ru.rosreestr.client.isur.handler;
 
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
@@ -13,6 +14,7 @@ import java.util.Set;
 /**
  * Created by KatrinaBosh on 28.09.2016.
  */
+@Component
 public class IsurLoggerHandler implements SOAPHandler<SOAPMessageContext> {
     private static final Logger LOG = Logger.getLogger(IsurLoggerHandler.class);
 

@@ -1,16 +1,21 @@
 
 package ru.rosreestr.client.isur;
 
-import org.springframework.stereotype.Component;
+import com.sun.xml.internal.ws.developer.WSBindingProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.rosreestr.client.isur.handler.IsurLoggerHandler;
+import ru.rosreestr.client.isur.handler.IsurSignatureHandler;
 
-import javax.jws.HandlerChain;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.handler.Handler;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -20,7 +25,7 @@ import java.net.URL;
  * 
  */
 @WebServiceClient(name = "Service", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/")
-@HandlerChain(file="handler-chain.xml")
+//@HandlerChain(file="handler-chain.xml")
 @org.springframework.stereotype.Service
 public class Service extends javax.xml.ws.Service {
 
@@ -39,6 +44,12 @@ public class Service extends javax.xml.ws.Service {
         SERVICE_WSDL_LOCATION = url;
         SERVICE_EXCEPTION = e;
     }
+
+    @Autowired
+    private IsurSignatureHandler signatureHandler;
+
+    @Autowired
+    private IsurLoggerHandler loggerHandler;
 
     public Service() {
         super(__getWsdlLocation(), SERVICE_QNAME);
@@ -71,7 +82,15 @@ public class Service extends javax.xml.ws.Service {
      */
     @WebEndpoint(name = "CustomBinding_IService")
     public IService getCustomBindingIService() {
-        return super.getPort(new QName("http://asguf.mos.ru/rkis_gu/coordinate/v5/", "CustomBinding_IService"), IService.class);
+        IService customBindingIService = super.getPort(new QName("http://asguf.mos.ru/rkis_gu/coordinate/v5/", "CustomBinding_IService"), IService.class);
+
+        List<Handler> handlers = ((WSBindingProvider) customBindingIService).getBinding().getHandlerChain();
+        if (handlers == null)
+            handlers = new ArrayList<Handler>();
+        handlers.add(signatureHandler);
+        handlers.add(loggerHandler);
+        ((WSBindingProvider) customBindingIService).getBinding().setHandlerChain(handlers);
+        return customBindingIService;
     }
 
     /**
@@ -83,7 +102,15 @@ public class Service extends javax.xml.ws.Service {
      */
     @WebEndpoint(name = "CustomBinding_IService")
     public IService getCustomBindingIService(WebServiceFeature... features) {
-        return super.getPort(new QName("http://asguf.mos.ru/rkis_gu/coordinate/v5/", "CustomBinding_IService"), IService.class, features);
+         IService customBindingIService = super.getPort(new QName("http://asguf.mos.ru/rkis_gu/coordinate/v5/", "CustomBinding_IService"), IService.class, features);
+
+        List<Handler> handlers = ((WSBindingProvider) customBindingIService).getBinding().getHandlerChain();
+        if (handlers == null)
+            handlers = new ArrayList<Handler>();
+        handlers.add(signatureHandler);
+        handlers.add(loggerHandler);
+        ((WSBindingProvider) customBindingIService).getBinding().setHandlerChain(handlers);
+        return customBindingIService;
     }
 
     private static URL __getWsdlLocation() {
