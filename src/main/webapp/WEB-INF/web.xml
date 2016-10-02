@@ -12,7 +12,11 @@
     </context-param>
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>ru.rosreestr.config.AppConfig</param-value>
+        <param-value>
+            ru.rosreestr.config.AppConfig
+            ru.rosreestr.config.PersistentConfig
+            ru.rosreestr.config.ServiceConfig
+        </param-value>
     </context-param>
 
     <listener>
