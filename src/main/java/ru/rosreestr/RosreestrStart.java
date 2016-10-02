@@ -13,7 +13,7 @@ import ru.rosreestr.config.PersistentConfig;
 public class RosreestrStart {
 
     public static void main(String[] args) {
-        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);//, PersistentConfig.class);
+        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class, PersistentConfig.class);//, PersistentConfig.class);
 
         AppProperties properties = context.getBean(AppProperties.class);
         System.out.println(properties.getIsur());

@@ -1,20 +1,26 @@
 package ru.rosreestr.model;
 
+import javax.persistence.*;
+
 /**
  * Created by KatrinaBosh on 28.09.2016.
  */
-//@Entity
-//@Table(name = "WS_SERVICES")
+@Entity
+@Table(name = "WS_SERVICES")
 public class WebService {
 
     /**
      * Идентификатор сервиса
      */
+    @Id
+    @GeneratedValue
+    @Column(name = "service_id")
     Long serviceId;
 
     /**
      * Наименование Сервиса
      */
+    @Column(name = "name")
     String name;
 
     public String getName() {
