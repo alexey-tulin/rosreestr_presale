@@ -16,8 +16,9 @@ import javax.jws.WebService;
  * Web service for external systems
  */
 @Service("isurtestws")
-@WebService(serviceName = "isurtestws", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/")
-public class ServiceWS extends SpringBeanAutowiringSupport implements IService {
+@WebService(serviceName = "isurtestws", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/",
+        endpointInterface = "ru.rosreestr.ws.IService")
+public class ServiceWS implements IService {
 
     @Autowired
     @Qualifier("serviceWSProcessor")
