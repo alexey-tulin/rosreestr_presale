@@ -25,6 +25,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -46,7 +47,7 @@ public class SignatureUtils {
     public static final String XSD_WSSE = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
     public static final String XSD_WSU = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
 
-    public static void addSecurityBlock(SOAPMessage message, String certificateAlias, char[] password) throws SOAPException, CertificateException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, MarshalException, XMLSignatureException, TransformerException {
+    public static void addSecurityBlock(SOAPMessage message, String certificateAlias, char[] password) throws SOAPException, CertificateException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, MarshalException, XMLSignatureException, TransformerException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
         if (message == null) {
             return;
@@ -84,7 +85,7 @@ public class SignatureUtils {
         X509Certificate x509Certificate = ksw.getX509Certificate(certificateAlias);
         PrivateKey privateKey = ksw.getPrivateKey(certificateAlias, password);
 
-        Provider pxml = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
+        Provider pxml = (Provider) Class.forName("ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI").getConstructor().newInstance();
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", pxml);
 
         List<Transform> transformList = new ArrayList<Transform>();
@@ -194,7 +195,7 @@ public class SignatureUtils {
             throw new Exception("Не найден элемент Signature.");
         }
         // Задаем открытый ключ для проверки подписи.
-        Provider xmlDSigProvider = new ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI();
+        Provider xmlDSigProvider = (Provider) Class.forName("ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI").getConstructor().newInstance();
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", xmlDSigProvider);
         DOMValidateContext valContext = new DOMValidateContext(KeySelector.singletonKeySelector(cert.getPublicKey()), nl.item(0));
         javax.xml.crypto.dsig.XMLSignature signature = fac.unmarshalXMLSignature(valContext);
