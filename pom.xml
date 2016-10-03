@@ -96,7 +96,9 @@
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc6</artifactId>
+            <scope>system</scope>
             <version>${oracle.jdbc.version}</version>
+            <systemPath>${project.basedir}/src/main/resources/lib/ojdbc6-11.2.0.3.jar</systemPath>
         </dependency>
 
         <!-- Test -->
@@ -151,14 +153,6 @@
          <!--   <scope>${jaxws.scope}</scope>-->
         </dependency>
 
-        <!-- jax-ws runtime from glassfish Metro - project tango -->
-        <dependency>
-            <groupId>org.glassfish.metro</groupId>
-            <artifactId>webservices-rt</artifactId>
-            <version>${metro.jaxws.version}</version>
-        <!--    <scope>${jaxws.scope}</scope> -->
-        </dependency>
-
         <!-- Configure JAX-WS with Spring -->
         <dependency>
             <groupId>org.jvnet.jax-ws-commons.spring</groupId>
@@ -188,16 +182,6 @@
             <artifactId>xercesImpl</artifactId>
             <version>2.11.0</version>
         </dependency>
- <!--       <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxws</artifactId>
-            <version>3.1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-transports-http</artifactId>
-            <version>3.1.7</version>
-        </dependency> -->
     </dependencies>
     <build>
         <finalName>rosreestr-presale</finalName>
@@ -232,30 +216,6 @@
                    <includes>
                        <include>**/*UnitTest.java</include>
                    </includes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxws-maven-plugin</artifactId>
-                <version>1.12</version>
-                <executions>
-                    <execution>
-                        <id>generate-wsdl</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>wsgen</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <sei>ru.rosreestr.ws.ServiceWS</sei>
-                    <!--for demo purpose only, the webapp does not-->
-                    <!--need the generated wsdl files-->
-                    <genWsdl>true</genWsdl>
-                    <keep>true</keep>
-                    <verbose>true</verbose>
-                    <resourceDestDir>${basedir}/src/main/webapp/WEB-INF/wsdl</resourceDestDir>
-                    <sourceDestDir>${basedir}/src/main/java</sourceDestDir>
                 </configuration>
             </plugin>
         </plugins>
