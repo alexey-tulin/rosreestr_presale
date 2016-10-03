@@ -2,13 +2,10 @@ package ru.rosreestr.ws;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import ru.rosreestr.client.isur.model.CoordinateStatusData;
 import ru.rosreestr.client.isur.model.ErrorMessage;
 
-import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
@@ -17,7 +14,8 @@ import javax.jws.WebService;
  * <p/>
  * Web service for external systems
  */
-@Component
+@Service("isurtestws")
+@WebService(serviceName = "isurtestws", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/")
 public class ServiceWS implements IService {
 
     @Autowired

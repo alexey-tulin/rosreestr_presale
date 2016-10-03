@@ -15,7 +15,7 @@ import javax.xml.ws.Action;
  * Generated source version: 3.1.7
  * 
  */
-@WebService(targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", name = "IService")
+@WebService(targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", name = "isurtestws")
 @XmlSeeAlso({ObjectFactory.class})
 public interface IService {
 
