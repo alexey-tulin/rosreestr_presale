@@ -13,8 +13,8 @@ import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.io.ByteArrayOutputStream;
 import java.util.Set;
-
-public class IsurSignatureHandler  implements SOAPHandler<SOAPMessageContext> { //extends SpringBeanAutowiringSupport
+@Component
+public class IsurSignatureHandler implements SOAPHandler<SOAPMessageContext> { //extends SpringBeanAutowiringSupport
 
     private static final Logger LOGGER = Logger.getLogger(IsurSignatureHandler.class);
 

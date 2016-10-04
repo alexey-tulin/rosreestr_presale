@@ -14,6 +14,7 @@ import java.util.Set;
 /**
  * Created by KatrinaBosh on 28.09.2016.
  */
+@Component
 public class IsurLoggerHandler implements SOAPHandler<SOAPMessageContext> {
     private static final Logger LOG = Logger.getLogger(IsurLoggerHandler.class);
 
