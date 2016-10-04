@@ -19,7 +19,7 @@ import javax.xml.ws.Action;
 @XmlSeeAlso({
         ObjectFactory.class
 })
-public interface IService {
+public interface IsurService {
 
     /**
      *

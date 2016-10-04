@@ -103,7 +103,7 @@
             <artifactId>ojdbc6</artifactId>
             <scope>system</scope>
             <version>${oracle.jdbc.version}</version>
-            <systemPath>${project.basedir}/src/main/resources/lib/ojdbc6-11.2.0.3.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/ojdbc6-11.2.0.3.jar</systemPath>
         </dependency>
 
         <!-- Test -->
@@ -127,7 +127,7 @@
             <artifactId>crypto</artifactId>
             <version>1.2</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/crypto-1.2.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/crypto-1.2.jar</systemPath>
         </dependency>
 
         <dependency>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<project name="rosreestr" basedir=".">
+
+    <property name="xsd.path" value=".\src\main\resources\xsd"/>
+
+    <target name="generate_beans">
+        <java classname="com.sun.tools.internal.xjc.XJCFacade">
+            <arg value="-extension"/>
+            <arg value="-enableIntrospection"/>
+            <arg value="-d"/>
+            <arg value="./src/main/java/"/>
+            <arg value="-p"/>
+            <arg value="ru.rosreestr.ws.model"/>
+            <arg value="${xsd.path}/RosreestrService_schema.xsd"/>
+        </java>
+    </target>
+
+</project>
