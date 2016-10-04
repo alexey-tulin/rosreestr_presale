@@ -1,19 +1,15 @@
 package ru.rosreestr.client.isur.processor;
 
-import com.sun.xml.internal.bind.api.JAXBRIContext;
-import com.sun.xml.internal.ws.api.message.Headers;
-import com.sun.xml.internal.ws.developer.WSBindingProvider;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.rosreestr.client.isur.IService;
-import ru.rosreestr.client.isur.Service;
+import ru.rosreestr.client.isur.ServiceClient;
 import ru.rosreestr.client.isur.model.*;
 import ru.rosreestr.config.AppProperties;
 import ru.rosreestr.utils.CommonUtils;
 import ru.rosreestr.utils.SignatureUtils;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+
 import java.util.UUID;
 
 /**
@@ -29,22 +25,21 @@ public class ServiceImpl {
     private static final String SERVICE_NUMBER_TEMPLATE = "2033-9000085-047202-%s/%s";
 
     @Autowired
-    public Service service;
+    private ServiceClient serviceClient;
 
     @Autowired
     private AppProperties properties;
 
-
     /**
-     * Method for invoking {@link IService#sendTask(CoordinateTaskData)} service
+     * Method for invoking {@link IService#sendTask} service
      */
     public void sendTask() {
         LOG.info("start service sendTask");
-        IService customBindingIService = service.getCustomBindingIService();
+        ru.rosreestr.client.isur.IService customBindingIService = serviceClient.getCustomBindingIService();
         String serviceNumber = String.format(SERVICE_NUMBER_TEMPLATE, getNewMessageNum(), CommonUtils.getCurrentYear());
         CoordinateTaskData coordinateTaskData = createCoordinateTaskData(serviceNumber);
-        addHeader((WSBindingProvider) customBindingIService, createSendTaskHeaders(serviceNumber));
-        customBindingIService.sendTask(coordinateTaskData);
+        ru.rosreestr.client.isur.model.Headers sendTaskHeaders = createSendTaskHeaders(serviceNumber);
+        customBindingIService.sendTask(coordinateTaskData, sendTaskHeaders);
         LOG.info("end service sendTask");
     }
 
@@ -123,7 +118,7 @@ public class ServiceImpl {
         try {
             return SignatureUtils.sign(data, properties.getSignatureAlias(), properties.getSignaturePassword().toCharArray());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
         return null;
     }
@@ -141,17 +136,5 @@ public class ServiceImpl {
         headers.setMessageId(UUID.randomUUID().toString());
         headers.setServiceNumber(serviceNumber);
         return headers;
-    }
-
-    private void addHeader(WSBindingProvider customBindingIService, ru.rosreestr.client.isur.model.Headers headers) {
-        JAXBElement<ru.rosreestr.client.isur.model.Headers> serviceHeader = new ObjectFactory().createServiceHeader(headers);
-        try {
-            customBindingIService.setOutboundHeaders(
-                    Headers.create(JAXBRIContext.newInstance(new Class[]{ru.rosreestr.client.isur.model.Headers.class}, null, null, null, false, null),
-                            serviceHeader)
-            );
-        } catch (JAXBException e) {
-            LOG.error(e.getMessage(), e);
-        }
     }
 }

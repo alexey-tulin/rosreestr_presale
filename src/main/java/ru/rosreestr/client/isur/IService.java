@@ -58,16 +58,20 @@ public interface IService {
     /**
      * 
      * @param message
+     * @param serviceHeader
      */
     @WebMethod(operationName = "SendRequest", action = "http://asguf.mos.ru/rkis_gu/coordinate/v5/SendRequest")
     @Oneway
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     public void sendRequest(
             @WebParam(name = "Message", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", partName = "Message")
-            CoordinateData message);
+            CoordinateData message,
+            @WebParam(name = "ServiceHeader", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", header = true, partName = "ServiceHeader")
+            Headers serviceHeader);
 
     /**
      * 
+     * @param serviceHeader
      * @param taskMessage
      */
     @WebMethod(operationName = "SendTask", action = "http://asguf.mos.ru/rkis_gu/coordinate/v5/SendTask")
@@ -75,10 +79,13 @@ public interface IService {
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     public void sendTask(
             @WebParam(name = "TaskMessage", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", partName = "TaskMessage")
-            CoordinateTaskData taskMessage);
+            CoordinateTaskData taskMessage,
+            @WebParam(name = "ServiceHeader", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", header = true, partName = "ServiceHeader")
+            Headers serviceHeader);
 
     /**
      * 
+     * @param serviceHeader
      * @param statusMessage
      */
     @WebMethod(operationName = "SetFilesAndStatus", action = "http://asguf.mos.ru/rkis_gu/coordinate/v5/SetFilesAndStatus")
@@ -86,10 +93,13 @@ public interface IService {
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     public void setFilesAndStatus(
             @WebParam(name = "StatusMessage", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", partName = "StatusMessage")
-            CoordinateStatusData statusMessage);
+            CoordinateStatusData statusMessage,
+            @WebParam(name = "ServiceHeader", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", header = true, partName = "ServiceHeader")
+            Headers serviceHeader);
 
     /**
      * 
+     * @param serviceHeader
      * @param parameters
      */
     @WebMethod(operationName = "Acknowledgement", action = "http://asguf.mos.ru/rkis_gu/coordinate/v5/Acknowledgement")
@@ -97,10 +107,13 @@ public interface IService {
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     public void acknowledgement(
             @WebParam(name = "ErrorMessage", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", partName = "parameters")
-            ErrorMessage parameters);
+            ErrorMessage parameters,
+            @WebParam(name = "ServiceHeader", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", header = true, partName = "ServiceHeader")
+            Headers serviceHeader);
 
     /**
      * 
+     * @param serviceHeader
      * @param requestsMessage
      */
     @WebMethod(operationName = "SendRequests", action = "http://asguf.mos.ru/rkis_gu/coordinate/v5/SendRequests")
@@ -108,10 +121,13 @@ public interface IService {
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     public void sendRequests(
             @WebParam(name = "RequestsMessage", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", partName = "RequestsMessage")
-            ArrayOfCoordinateData requestsMessage);
+            ArrayOfCoordinateData requestsMessage,
+            @WebParam(name = "ServiceHeader", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", header = true, partName = "ServiceHeader")
+            Headers serviceHeader);
 
     /**
      * 
+     * @param serviceHeader
      * @param tasksMessage
      */
     @WebMethod(operationName = "SendTasks", action = "http://asguf.mos.ru/rkis_gu/coordinate/v5/SendTasks")
@@ -119,17 +135,22 @@ public interface IService {
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     public void sendTasks(
             @WebParam(name = "TasksMessage", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", partName = "TasksMessage")
-            ArrayOfCoordinateTaskData tasksMessage);
+            ArrayOfCoordinateTaskData tasksMessage,
+            @WebParam(name = "ServiceHeader", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", header = true, partName = "ServiceHeader")
+            Headers serviceHeader);
 
     /**
      * 
      * @param statusesMessage
+     * @param serviceHeader
      */
     @WebMethod(operationName = "SetFilesAndStatuses", action = "http://asguf.mos.ru/rkis_gu/coordinate/v5/SetFilesAndStatuses")
     @Oneway
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     public void setFilesAndStatuses(
             @WebParam(name = "StatusesMessage", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", partName = "StatusesMessage")
-            ArrayOfSetFilesAndStatusesData statusesMessage);
+            ArrayOfSetFilesAndStatusesData statusesMessage,
+            @WebParam(name = "ServiceHeader", targetNamespace = "http://asguf.mos.ru/rkis_gu/coordinate/v5/", header = true, partName = "ServiceHeader")
+            Headers serviceHeader);
 
 }

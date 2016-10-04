@@ -13,9 +13,9 @@ import javax.annotation.Resource;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {AppConfig.class, PersistentConfig.class})
-public class WebServiceRepositoryTest extends TestCase {
+public class WebServiceClientRepositoryTest extends TestCase {
 
-    private static final Logger LOGGER = Logger.getLogger(WebServiceRepositoryTest.class);
+    private static final Logger LOGGER = Logger.getLogger(WebServiceClientRepositoryTest.class);
 
     @Resource
     private WebServiceRepository wsRepository;

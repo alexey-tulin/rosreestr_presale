@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
  * <p/>
  * Test for {@link ServiceWS}
  */
-public class ServiceWSTest {
+public class ServiceClientWSTest {
 
     @Test
     public void testSetFilesAndStatus() throws Exception {

@@ -14,7 +14,6 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.io.ByteArrayOutputStream;
 import java.util.Set;
 
-@Component
 public class IsurSignatureHandler  implements SOAPHandler<SOAPMessageContext> { //extends SpringBeanAutowiringSupport
 
     private static final Logger LOGGER = Logger.getLogger(IsurSignatureHandler.class);
@@ -63,12 +62,12 @@ public class IsurSignatureHandler  implements SOAPHandler<SOAPMessageContext> { 
                 LOGGER.error(ex.getMessage(), ex);
             }
         }
-        return false;
+        return true;
     }
 
     public boolean handleFault(SOAPMessageContext context) {
         // todo
-        return false;
+        return true;
     }
 
     public void close(MessageContext context) {

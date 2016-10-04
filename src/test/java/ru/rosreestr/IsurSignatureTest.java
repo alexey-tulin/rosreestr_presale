@@ -2,8 +2,7 @@ package ru.rosreestr;
 
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import com.sun.xml.internal.bind.api.JAXBRIContext;
-import com.sun.xml.internal.ws.developer.WSBindingProvider;
+
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ru.rosreestr.client.isur.IService;
-import ru.rosreestr.client.isur.Service;
+import ru.rosreestr.client.isur.ServiceClient;
 import ru.rosreestr.client.isur.model.*;
 import ru.rosreestr.config.AppConfig;
 import ru.rosreestr.config.AppProperties;
@@ -36,7 +35,7 @@ public class IsurSignatureTest {
     private static final String SERVICE_NUMBER_TEMPLATE = "2033-9000085-047202-%s/%s";
 
     @Autowired
-    private Service service;
+    private ServiceClient serviceClient;
 
     @Autowired
     private AppProperties properties;
@@ -70,18 +69,8 @@ public class IsurSignatureTest {
         coordinateTaskData.getTask().setServiceNumber("9990-9999999-999998-093023/16");
         coordinateTaskData.getTask().setServiceTypeCode("999998");
 
-        IService customBindingIService = service.getCustomBindingIService();
-        // add headers
-        JAXBElement<ru.rosreestr.client.isur.model.Headers> serviceHeader = new ObjectFactory().createServiceHeader(headers);
-        try {
-            ((WSBindingProvider) customBindingIService).setOutboundHeaders(
-                    com.sun.xml.internal.ws.api.message.Headers.create(JAXBRIContext.newInstance(new Class[]{ru.rosreestr.client.isur.model.Headers.class}, null, null, null, false, null),
-                            serviceHeader)
-            );
-        } catch (JAXBException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        customBindingIService.sendTask(coordinateTaskData);
+        IService customBindingIService = serviceClient.getCustomBindingIService();
+        customBindingIService.sendTask(coordinateTaskData, headers);
     }
 
     @Test
