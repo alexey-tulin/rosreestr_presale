@@ -1,4 +1,4 @@
-package ru.rosreestr.repository;
+package ru.rosreestr.persistence.repository;
 
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;

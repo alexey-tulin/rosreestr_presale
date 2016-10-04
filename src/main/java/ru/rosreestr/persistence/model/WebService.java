@@ -1,4 +1,4 @@
-package ru.rosreestr.model;
+package ru.rosreestr.persistence.model;
 
 import javax.persistence.*;
 

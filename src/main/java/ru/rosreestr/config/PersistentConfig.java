@@ -3,7 +3,6 @@ package ru.rosreestr.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.jpa.provider.HibernateUtils;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -18,7 +17,7 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "ru.rosreestr.repository")
+@EnableJpaRepositories(basePackages = "ru.rosreestr.persistence.repository")
 @PropertySource("classpath:application.properties")
 public class PersistentConfig {
 

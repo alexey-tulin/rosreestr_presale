@@ -3,4 +3,4 @@
  *
  *  Работа с БД.
  */
-package ru.rosreestr.repository;
+package ru.rosreestr.persistence.repository;

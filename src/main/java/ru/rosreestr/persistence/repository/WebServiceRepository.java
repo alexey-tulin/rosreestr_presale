@@ -1,8 +1,8 @@
-package ru.rosreestr.repository;
+package ru.rosreestr.persistence.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.query.Procedure;
-import ru.rosreestr.model.WebService;
+import ru.rosreestr.persistence.model.WebService;
 
 import java.util.Date;
 
