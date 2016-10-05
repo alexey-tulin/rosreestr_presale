@@ -18,7 +18,7 @@
         <hibernate.version>4.2.19.Final</hibernate.version>
         <metro.jaxws.version>2.3</metro.jaxws.version>
         <sun.jaxws.version>2.2.8</sun.jaxws.version>
-        <jaxws.scope>compile</jaxws.scope> <!-- provided(weblogic) / compile(tomcat) -->
+        <jaxws.scope>provided</jaxws.scope> <!-- provided(weblogic) / compile(tomcat) -->
         <spring.scope>compile</spring.scope>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -155,7 +155,7 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
             <version>${sun.jaxws.version}</version>
-            <!--   <scope>${jaxws.scope}</scope>-->
+            <scope>${jaxws.scope}</scope>
         </dependency>
 
         <!-- Configure JAX-WS with Spring -->
