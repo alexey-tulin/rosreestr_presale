@@ -6,6 +6,8 @@ import ru.rosreestr.persistence.model.WebService;
 import ru.rosreestr.persistence.repository.WebServiceRepository;
 
 import javax.annotation.Resource;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by KatrinaBosh on 08.10.2016.
@@ -26,5 +28,23 @@ public class WebServiceServiceImpl implements WebServiceService {
     @Transactional
     public WebService save(WebService webService) {
         return webServiceRepository.saveAndFlush(webService);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<WebService> findByParam(String paramName,Date paramValue) {
+        return webServiceRepository.findByParam(paramName, paramValue);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<WebService> findByParam(String paramName,Integer paramValue) {
+        return webServiceRepository.findByParam(paramName, paramValue);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<WebService> findByParam(String paramName,String paramValue) {
+        return webServiceRepository.findByParam(paramName, paramValue);
     }
 }
