@@ -57,7 +57,7 @@ public class LoggerHandler implements SOAPHandler<SOAPMessageContext> {
 
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            loggerDbService.log(new Date(), new Date(), 0L, serviceId, LogType.LOG_JAVA, LogLevel.LOG_LEVEL_INFO, 0, e.getMessage(), ExceptionUtils.getStackTrace(e),"");
+            loggerDbService.log(new Date(), new Date(), 0L, serviceId, LogType.JAVA, LogLevel.ERROR, 0, e.getMessage(), ExceptionUtils.getStackTrace(e),"");
         }
         return true;
     }

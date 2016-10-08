@@ -5,8 +5,8 @@ package ru.rosreestr.persistence.model;
  */
 public class LogType {
 
-    public static final int LOG_JAVA = 1;    // Для логирования кода JAVA
+    public static final int JAVA = 1;    // Для логирования кода JAVA
 
-    public static final int LOG_PLS = 2;     // Для логирования кода PLS
+    public static final int PLS = 2;     // Для логирования кода PLS
 
 }

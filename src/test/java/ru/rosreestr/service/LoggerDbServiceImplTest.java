@@ -51,9 +51,9 @@ public class LoggerDbServiceImplTest extends TestCase {
     @Test
     public void testLog() throws Exception {
 
-        loggerDbService.log(new Date(), new Date(), -1L, webService.getServiceId(), LogType.LOG_JAVA, LogLevel.LOG_LEVEL_INFO, 1, "test", "textError", "messageId");
+        loggerDbService.log(new Date(), new Date(), -1L, webService.getServiceId(), LogType.JAVA, LogLevel.INFO, 1, "test", "textError", "messageId");
 
-        loggerDbService.log(new Date(), new Date(), -1L, webService.getServiceId(), LogType.LOG_JAVA, LogLevel.LOG_LEVEL_INFO, 1, "test", "textError");
+        loggerDbService.log(new Date(), new Date(), -1L, webService.getServiceId(), LogType.JAVA, LogLevel.INFO, 1, "test", "textError");
     }
 
     @Test
