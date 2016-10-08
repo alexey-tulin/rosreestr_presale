@@ -9,7 +9,7 @@
     </javaee:handler-chain>
     <javaee:handler-chain>
         <javaee:handler>
-            <javaee:handler-class>ru.rosreestr.client.isur.handler.IsurLoggerHandler</javaee:handler-class>
+            <javaee:handler-class>ru.rosreestr.client.isur.handler.LoggerHandler</javaee:handler-class>
         </javaee:handler>
     </javaee:handler-chain>-->
 </javaee:handler-chains>

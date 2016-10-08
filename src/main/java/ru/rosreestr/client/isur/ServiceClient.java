@@ -2,9 +2,20 @@
 package ru.rosreestr.client.isur;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.rosreestr.client.isur.handler.IsurLoggerHandler;
 import ru.rosreestr.client.isur.handler.IsurSignatureHandler;
+import ru.rosreestr.exception.DuplicateWebServiceException;
+import ru.rosreestr.exception.DuplicateWebServiceParamException;
+import ru.rosreestr.exception.NotFoundWebServiceException;
+import ru.rosreestr.exception.NotFoundWebServiceParamException;
+import ru.rosreestr.handler.LoggerHandler;
+import ru.rosreestr.persistence.model.WebService;
+import ru.rosreestr.persistence.model.WebServiceCode;
+import ru.rosreestr.persistence.model.WebServiceConfig;
+import ru.rosreestr.persistence.model.WebServiceParam;
+import ru.rosreestr.service.WebServiceConfigService;
+import ru.rosreestr.service.WebServiceService;
 
+import javax.annotation.PostConstruct;
 import javax.xml.namespace.QName;
 import javax.xml.ws.*;
 import javax.xml.ws.handler.Handler;
@@ -24,6 +35,9 @@ import java.util.List;
 //@HandlerChain(file="handler-chain.xml")
 @org.springframework.stereotype.Service
 public class ServiceClient extends javax.xml.ws.Service {
+
+
+    private static final WebServiceCode code = WebServiceCode.ISUR;
 
     private final static URL SERVICE_WSDL_LOCATION;
     private final static WebServiceException SERVICE_EXCEPTION;
@@ -45,30 +59,54 @@ public class ServiceClient extends javax.xml.ws.Service {
     private IsurSignatureHandler signatureHandler;
 
     @Autowired
-    private IsurLoggerHandler loggerHandler;
+    private LoggerHandler loggerHandler;
 
-    public ServiceClient() {
-        super(__getWsdlLocation(), SERVICE_QNAME);
-    }
+    @Autowired
+    private WebServiceService wsService;
 
-    public ServiceClient(WebServiceFeature... features) {
-        super(__getWsdlLocation(), SERVICE_QNAME, features);
-    }
+    @Autowired
+    private WebServiceConfigService wsParamsService;
 
-    public ServiceClient(URL wsdlLocation) {
-        super(wsdlLocation, SERVICE_QNAME);
-    }
+    @PostConstruct
+    protected void init() throws DuplicateWebServiceException, NotFoundWebServiceException, NotFoundWebServiceParamException, DuplicateWebServiceParamException {
+        List<WebService> webServices = wsService.findByParam(WebServiceParam.CODE, code.name());
 
-    public ServiceClient(URL wsdlLocation, WebServiceFeature... features) {
-        super(wsdlLocation, SERVICE_QNAME, features);
-    }
+        if (webServices.isEmpty()) {
+            throw  new NotFoundWebServiceException(code);
+        } else if (webServices.size() > 1) {
+            throw new DuplicateWebServiceException(webServices, code);
+        }
 
-    public ServiceClient(URL wsdlLocation, QName serviceName) {
-        super(wsdlLocation, serviceName);
-    }
+        Integer serviceId = webServices.get(0).getServiceId();
+/*
+TODO вынести создание клиента в другой класс, чтобы была возможность создавать клиента по параметру из БД
+и в том классе раскоментировать блок ниже
 
-    public ServiceClient(URL wsdlLocation, QName serviceName, WebServiceFeature... features) {
-        super(wsdlLocation, serviceName, features);
+        List<WebServiceConfig> wsdlParams = wsParamsService.findByServiceIdAndName(serviceId, WebServiceParam.WSDL);
+        if (wsdlParams.isEmpty()) {
+            throw  new NotFoundWebServiceParamException(WebServiceParam.WSDL);
+        } else if (wsdlParams.size() > 1) {
+            throw new DuplicateWebServiceParamException(WebServiceParam.WSDL);
+        }
+
+        URL url = null;
+        WebServiceException e = null;
+        try {
+            url = new URL(wsdlParams.get(0).getStringValue());
+        } catch (MalformedURLException ex) {
+            e = new WebServiceException(ex);
+        }
+        SERVICE_WSDL_LOCATION = url;
+        SERVICE_EXCEPTION = e;
+
+        */
+
+        // configure loggerHandler
+        loggerHandler.setServiceId(serviceId);
+        List<WebServiceConfig> loggingEnableParams = wsParamsService.findByServiceIdAndName(serviceId, WebServiceParam.LOGGING_ENABLE);
+        if (!loggingEnableParams.isEmpty()) {
+            loggerHandler.setIsLogXmlEnable(Boolean.TRUE.equals(loggingEnableParams.get(0).getBooleanValue()));
+        }
     }
 
     /**
@@ -108,6 +146,31 @@ public class ServiceClient extends javax.xml.ws.Service {
         ((BindingProvider) customBindingIService).getBinding().setHandlerChain(handlers);
         return customBindingIService;
     }
+
+    public ServiceClient() {
+        super(__getWsdlLocation(), SERVICE_QNAME);
+    }
+
+    public ServiceClient(WebServiceFeature... features) {
+        super(__getWsdlLocation(), SERVICE_QNAME, features);
+    }
+
+    public ServiceClient(URL wsdlLocation) {
+        super(wsdlLocation, SERVICE_QNAME);
+    }
+
+    public ServiceClient(URL wsdlLocation, WebServiceFeature... features) {
+        super(wsdlLocation, SERVICE_QNAME, features);
+    }
+
+    public ServiceClient(URL wsdlLocation, QName serviceName) {
+        super(wsdlLocation, serviceName);
+    }
+
+    public ServiceClient(URL wsdlLocation, QName serviceName, WebServiceFeature... features) {
+        super(wsdlLocation, serviceName, features);
+    }
+
 
     private static URL __getWsdlLocation() {
         if (SERVICE_EXCEPTION!= null) {
