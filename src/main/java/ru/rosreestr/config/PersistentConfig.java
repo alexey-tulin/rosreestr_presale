@@ -39,7 +39,7 @@ public class PersistentConfig {
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        vendorAdapter.setGenerateDdl(true);
+       // vendorAdapter.setGenerateDdl(true);
         vendorAdapter.setDatabasePlatform("org.hibernate.dialect.Oracle10gDialect");
 
         LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();

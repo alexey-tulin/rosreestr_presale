@@ -15,7 +15,7 @@
     <properties>
         <spring.version>4.3.1.RELEASE</spring.version>
         <oracle.jdbc.version>11.2.0.3</oracle.jdbc.version>
-        <hibernate.version>4.2.19.Final</hibernate.version>
+        <hibernate.version>4.3.0.Final</hibernate.version>
         <metro.jaxws.version>2.3</metro.jaxws.version>
         <sun.jaxws.version>2.2.8</sun.jaxws.version>
         <jaxws.scope>provided</jaxws.scope> <!-- provided(weblogic) / compile(tomcat) -->
@@ -73,7 +73,7 @@
                    <version>1.3.3.RELEASE</version>
                </dependency> -->
 
-        <dependency>
+      <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
@@ -82,21 +82,6 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
             <version>${hibernate.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>1.0.1.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>${hibernate.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.1-api</artifactId>
-            <version>1.0.0.Final</version>
         </dependency>
         <dependency>
             <groupId>com.oracle</groupId>
@@ -141,6 +126,13 @@
             <artifactId>commons-codec</artifactId>
             <version>1.9</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.3</version>
+        </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/org.apache.ws.security/wss4j -->
         <dependency>
