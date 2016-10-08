@@ -1,9 +1,12 @@
 package ru.rosreestr.handler;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import ru.rosreestr.persistence.model.LogLevel;
+import ru.rosreestr.persistence.model.LogType;
 import ru.rosreestr.service.LoggerDbService;
 
 import javax.xml.namespace.QName;
@@ -12,6 +15,7 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.io.ByteArrayOutputStream;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -49,9 +53,11 @@ public class LoggerHandler implements SOAPHandler<SOAPMessageContext> {
                 loggerDbService.logXml(serviceId, baos.toString(), Boolean.TRUE.equals(outboundProperty) ? 1 : 0);
             }
 
+            //throw new Exception();
+
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            //wsRepository.log(logDate, logDate, serviceId, 0, LogType.LOG_JAVA, LogLevel.LOG_LEVEL_INFO, logStep++, e.getMessage(), ExceptionUtils.getStackTrace(e),"");
+            loggerDbService.log(new Date(), new Date(), 0L, serviceId, LogType.LOG_JAVA, LogLevel.LOG_LEVEL_INFO, 0, e.getMessage(), ExceptionUtils.getStackTrace(e),"");
         }
         return true;
     }
