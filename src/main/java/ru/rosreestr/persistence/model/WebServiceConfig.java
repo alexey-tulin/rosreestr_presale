@@ -17,7 +17,7 @@ public class WebServiceConfig implements Serializable {
     private WebServiceConfigPk id;
 
     @Column(name = "name_param", insertable = false, updatable = false)
-    private String nameParam;
+    private String name;
 
     @Column(name = "service_id", insertable = false, updatable = false)
     private Integer serviceId;
@@ -66,12 +66,12 @@ public class WebServiceConfig implements Serializable {
         this.integerValue = integerValue;
     }
 
-    public String getNameParam() {
-        return nameParam;
+    public String getName() {
+        return name;
     }
 
-    public void setNameParam(String nameParam) {
-        this.nameParam = nameParam;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Integer getServiceId() {
