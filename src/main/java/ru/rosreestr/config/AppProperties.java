@@ -34,6 +34,61 @@ public class AppProperties {
     @Value("${datasource.password}")
     private String datasourcePassword;
 
+    @Value("${rosreestr.from-org-code}")
+    private String rosreestrFromOrgCode;
+
+    @Value("${rosreestr.to-org-code}")
+    private String rosreestrToOrgCode;
+
+    @Value("${rosreestr.service-number-template}")
+    private String rosreestrServiceNumberTemplate;
+
+    @Value("${rosreestr.service-type-code}")
+    private String rosreestrServiceTypeCode;
+
+    @Value("${rosreestr.document-type-code}")
+    private String rosreestrDocumentTypeCode;
+
+    public String getRosreestrDocumentTypeCode() {
+        return rosreestrDocumentTypeCode;
+    }
+
+    public void setRosreestrDocumentTypeCode(String rosreestrDocumentTypeCode) {
+        this.rosreestrDocumentTypeCode = rosreestrDocumentTypeCode;
+    }
+
+    public String getRosreestrServiceTypeCode() {
+        return rosreestrServiceTypeCode;
+    }
+
+    public void setRosreestrServiceTypeCode(String rosreestrServiceTypeCode) {
+        this.rosreestrServiceTypeCode = rosreestrServiceTypeCode;
+    }
+
+    public String getRosreestrServiceNumberTemplate() {
+        return rosreestrServiceNumberTemplate;
+    }
+
+    public void setRosreestrServiceNumberTemplate(String rosreestrServiceNumberTemplate) {
+        this.rosreestrServiceNumberTemplate = rosreestrServiceNumberTemplate;
+    }
+
+    public String getRosreestrFromOrgCode() {
+        return rosreestrFromOrgCode;
+    }
+
+    public void setRosreestrFromOrgCode(String rosreestrFromOrgCode) {
+        this.rosreestrFromOrgCode = rosreestrFromOrgCode;
+    }
+
+    public String getRosreestrToOrgCode() {
+        return rosreestrToOrgCode;
+    }
+
+    public void setRosreestrToOrgCode(String rosreestrToOrgCode) {
+        this.rosreestrToOrgCode = rosreestrToOrgCode;
+    }
+
     public String getIsur() {
         return isur;
     }

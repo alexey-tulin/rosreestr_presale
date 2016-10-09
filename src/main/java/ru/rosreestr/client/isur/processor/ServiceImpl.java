@@ -2,139 +2,89 @@ package ru.rosreestr.client.isur.processor;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import ru.rosreestr.client.isur.IService;
 import ru.rosreestr.client.isur.ServiceClient;
-import ru.rosreestr.client.isur.model.*;
-import ru.rosreestr.config.AppProperties;
-import ru.rosreestr.utils.CommonUtils;
-import ru.rosreestr.utils.SignatureUtils;
+import ru.rosreestr.client.isur.handler.IsurSignatureHandler;
+import ru.rosreestr.client.isur.model.CoordinateTaskData;
+import ru.rosreestr.client.isur.model.Headers;
+import ru.rosreestr.exception.DuplicateWebServiceException;
+import ru.rosreestr.exception.DuplicateWebServiceParamException;
+import ru.rosreestr.exception.NotFoundWebServiceException;
+import ru.rosreestr.exception.NotFoundWebServiceParamException;
+import ru.rosreestr.handler.LoggerHandler;
+import ru.rosreestr.persistence.model.WebService;
+import ru.rosreestr.persistence.model.WebServiceCode;
+import ru.rosreestr.persistence.model.WebServiceConfig;
+import ru.rosreestr.persistence.model.WebServiceParam;
+import ru.rosreestr.service.WebServiceConfigService;
+import ru.rosreestr.service.WebServiceService;
 
-
-import java.util.UUID;
+import javax.annotation.PostConstruct;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
 
 /**
  * Created by Tatiana Chukina on 28.09.2016 23:26.
  * <p/>
- * TODO place the file's description here
+ * Client for invoking {@link IService}
  */
 @org.springframework.stereotype.Service
 public class ServiceImpl {
     private static final Logger LOG = Logger.getLogger(ServiceImpl.class);
-    private static final String FROM_ORG_CODE = "2033";
-    private static final String TO_ORG_CODE = "1111";
-    private static final String SERVICE_NUMBER_TEMPLATE = "2033-9000085-047202-%s/%s";
+    private static final WebServiceCode code = WebServiceCode.ISUR;
 
-    @Autowired
     private ServiceClient serviceClient;
 
     @Autowired
-    private AppProperties properties;
+    private WebServiceService wsService;
+
+    @Autowired
+    private WebServiceConfigService wsParamsService;
+
+    @Autowired
+    ApplicationContext applicationContext;
 
     /**
      * Method for invoking {@link IService#sendTask} service
      */
-    public void sendTask() {
+    public void sendTask(CoordinateTaskData taskMessage, Headers serviceHeader) {
         LOG.info("start service sendTask");
         ru.rosreestr.client.isur.IService customBindingIService = serviceClient.getCustomBindingIService();
-        String serviceNumber = String.format(SERVICE_NUMBER_TEMPLATE, getNewMessageNum(), CommonUtils.getCurrentYear());
-        CoordinateTaskData coordinateTaskData = createCoordinateTaskData(serviceNumber);
-        ru.rosreestr.client.isur.model.Headers sendTaskHeaders = createSendTaskHeaders(serviceNumber);
-        customBindingIService.sendTask(coordinateTaskData, sendTaskHeaders);
+        customBindingIService.sendTask(taskMessage, serviceHeader);
         LOG.info("end service sendTask");
     }
 
-    private CoordinateTaskData createCoordinateTaskData(String serviceNumber) {
-        CoordinateTaskData coordinateTaskData = new CoordinateTaskData();
-        RequestTask requestTask = createRequestTask(serviceNumber);
-        DocumentsRequestData documentsRequestData = createDocumentsRequestData();
+    @PostConstruct
+    protected void init() throws NotFoundWebServiceException, DuplicateWebServiceException, NotFoundWebServiceParamException, DuplicateWebServiceParamException, MalformedURLException {
+        List<WebService> webServices = wsService.findByParam(WebServiceParam.CODE, code.name());
 
-        coordinateTaskData.setTask(requestTask);
-        coordinateTaskData.setData(documentsRequestData);
-        return coordinateTaskData;
-    }
-
-
-    private RequestTask createRequestTask(String serviceNumber) {
-        RequestTask requestTask = new RequestTask();
-        requestTask.setRequestId(UUID.randomUUID().toString());
-        requestTask.setServiceNumber(serviceNumber);
-        requestTask.setServiceTypeCode("047202");
-
-        Person responsible = new Person();
-        responsible.setLastName("Столыпин");
-        responsible.setFirstName("Петр");
-        responsible.setMiddleName("Аркадьевич");
-        responsible.setJobTitle("АСУ ЕИРЦ");
-        responsible.setPhone("8-999-999-99-99");
-        responsible.setEmail("test@test.test");
-        requestTask.setResponsible(responsible);
-
-        Department department = new Department();
-        department.setName("Департамент информационных технологий города Москвы");
-        department.setCode("707");
-        department.setInn("7710878000");
-        department.setOgrn("1107746943347");
-        requestTask.setDepartment(department);
-
-        return requestTask;
-    }
-
-    private DocumentsRequestData createDocumentsRequestData() {
-        DocumentsRequestData documentsRequestData = new DocumentsRequestData();
-        documentsRequestData.setDocumentTypeCode("77290");
-        documentsRequestData.setIncludeXmlView(true);
-        documentsRequestData.setIncludeBinaryView(true);
-        documentsRequestData.setParameterTypeCode("77290");
-        DocumentsRequestData.Parameter parameter = createParameter();
-        documentsRequestData.setParameter(parameter);
-        return documentsRequestData;
-    }
-
-    //TODO fill from db
-    private DocumentsRequestData.Parameter createParameter() {
-        DocumentsRequestData.Parameter parameter = new DocumentsRequestData.Parameter();
-        ServiceProperties serviceProperties = new ServiceProperties();
-        serviceProperties.setRegion("77");
-        serviceProperties.setCadastralnumber(getCadastralNumber());
-        serviceProperties.setTypeobject("002001002000");
-        serviceProperties.setTyperoom("IsNondomestic");
-
-        byte[] base64Props = CommonUtils.encodeObjectToBase64(serviceProperties);
-        ru.rosreestr.client.isur.model.base64.ServiceProperties servicePropertiesBase64 = new ru.rosreestr.client.isur.model.base64.ServiceProperties();
-        servicePropertiesBase64.setData(base64Props);
-        servicePropertiesBase64.setSignature(createSignature(base64Props));
-        parameter.setAny(servicePropertiesBase64);
-
-        return parameter;
-    }
-
-    //TODO fill in from db
-    private String getCadastralNumber() {
-        return "77:01:0004028:4359";
-    }
-
-    //TODO fill in
-    private byte[] createSignature(byte[] data) {
-        try {
-            return SignatureUtils.sign(data, properties.getSignatureAlias(), properties.getSignaturePassword().toCharArray());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        if (webServices.isEmpty()) {
+            throw new NotFoundWebServiceException(code);
+        } else if (webServices.size() > 1) {
+            throw new DuplicateWebServiceException(webServices, code);
         }
-        return null;
-    }
 
-    private String getNewMessageNum() {
-        //TODO retrieve from DB
-        return "000000";
-    }
+        Integer serviceId = webServices.get(0).getServiceId();
 
-    private ru.rosreestr.client.isur.model.Headers createSendTaskHeaders(String serviceNumber) {
-        ru.rosreestr.client.isur.model.Headers headers = new ru.rosreestr.client.isur.model.Headers();
-        headers.setFromOrgCode(FROM_ORG_CODE);
-        headers.setToOrgCode(TO_ORG_CODE);
-        headers.setRequestDateTime(CommonUtils.getXmlGregorianCurrentDate());
-        headers.setMessageId(UUID.randomUUID().toString());
-        headers.setServiceNumber(serviceNumber);
-        return headers;
+        List<WebServiceConfig> wsdlParams = wsParamsService.findByServiceIdAndName(serviceId, WebServiceParam.WSDL);
+        if (wsdlParams.isEmpty()) {
+            throw new NotFoundWebServiceParamException(WebServiceParam.WSDL);
+        } else if (wsdlParams.size() > 1) {
+            throw new DuplicateWebServiceParamException(WebServiceParam.WSDL);
+        }
+
+        URL url = new URL(wsdlParams.get(0).getStringValue());
+
+        List<WebServiceConfig> loggingEnableParams = wsParamsService.findByServiceIdAndName(serviceId, WebServiceParam.LOGGING_ENABLE);
+        IsurSignatureHandler isurSignatureHandler = applicationContext.getBean(IsurSignatureHandler.class);
+        LoggerHandler loggerHandler = applicationContext.getBean(LoggerHandler.class);
+
+        serviceClient = new ServiceClient(url);
+        serviceClient.setLoggerHandler(loggerHandler);
+        serviceClient.setSignatureHandler(isurSignatureHandler);
+        serviceClient.configureLogger(serviceId, !loggingEnableParams.isEmpty() &&
+                Boolean.TRUE.equals(loggingEnableParams.get(0).getBooleanValue()));
     }
 }
